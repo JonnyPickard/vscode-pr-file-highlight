@@ -36,6 +36,7 @@ export class PrFileDecorationProvider implements vscode.FileDecorationProvider {
 		branchChanges: Set<string>,
 		uncommitted: Set<string>,
 	): void {
+		const previousPaths = new Set(this.decorationMap.keys());
 		this.decorationMap.clear();
 
 		for (const filePath of branchChanges) {
@@ -47,12 +48,19 @@ export class PrFileDecorationProvider implements vscode.FileDecorationProvider {
 			this.decorationMap.set(filePath, 'uncommitted');
 		}
 
-		this._onDidChangeFileDecorations.fire(undefined);
+		// Fire with specific URIs so VS Code discovers files deep in the tree
+		// and can propagate decorations up to parent directories.
+		// Include previous paths too so stale decorations get cleared.
+		const affectedPaths = new Set([...previousPaths, ...this.decorationMap.keys()]);
+		this._onDidChangeFileDecorations.fire(
+			[...affectedPaths].map(p => vscode.Uri.file(p))
+		);
 	}
 
 	clear(): void {
+		const uris = [...this.decorationMap.keys()].map(p => vscode.Uri.file(p));
 		this.decorationMap.clear();
-		this._onDidChangeFileDecorations.fire(undefined);
+		this._onDidChangeFileDecorations.fire(uris);
 	}
 
 	dispose(): void {
