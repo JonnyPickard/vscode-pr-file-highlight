@@ -1,0 +1,135 @@
+{
+  "name": "pr-file-highlight",
+  "displayName": "PR File Highlight",
+  "description": "Highlights files changed in your current branch vs a base branch directly in the VS Code Explorer.",
+  "version": "0.1.0",
+  "publisher": "JonnyPickard",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JonnyPickard/vscode-pr-file-highlight"
+  },
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prFileHighlight.toggle",
+        "title": "PR File Highlight: Toggle"
+      },
+      {
+        "command": "prFileHighlight.refresh",
+        "title": "PR File Highlight: Refresh"
+      },
+      {
+        "command": "prFileHighlight.setBaseBranch",
+        "title": "PR File Highlight: Set Base Branch"
+      }
+    ],
+    "colors": [
+      {
+        "id": "prFileHighlight.branchChangeColor",
+        "description": "Color for files changed in the branch",
+        "defaults": {
+          "dark": "#a78bfa",
+          "light": "#7c3aed",
+          "highContrast": "#a78bfa"
+        }
+      },
+      {
+        "id": "prFileHighlight.uncommittedColor",
+        "description": "Color for uncommitted changes",
+        "defaults": {
+          "dark": "#c4b5fd",
+          "light": "#8b5cf6",
+          "highContrast": "#c4b5fd"
+        }
+      }
+    ],
+    "configuration": {
+      "title": "PR File Highlight",
+      "properties": {
+        "prFileHighlight.baseBranch": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "default": "main",
+          "description": "Branch to diff against. Use an array for fallback (e.g. [\"main\", \"master\"])."
+        },
+        "prFileHighlight.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable file decorations."
+        },
+        "prFileHighlight.branchChange.badge": {
+          "type": "string",
+          "default": "●",
+          "maxLength": 2,
+          "description": "Badge text for files changed in the branch."
+        },
+        "prFileHighlight.branchChange.tooltip": {
+          "type": "string",
+          "default": "Changed in branch",
+          "description": "Tooltip for files changed in the branch."
+        },
+        "prFileHighlight.uncommitted.badge": {
+          "type": "string",
+          "default": "◌",
+          "maxLength": 2,
+          "description": "Badge text for uncommitted changes."
+        },
+        "prFileHighlight.uncommitted.tooltip": {
+          "type": "string",
+          "default": "Uncommitted change",
+          "description": "Tooltip for uncommitted changes."
+        },
+        "prFileHighlight.ignorePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/package-lock.json",
+            "**/yarn.lock",
+            "**/*.generated.*"
+          ],
+          "description": "Glob patterns for files to never decorate."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "dependencies": {
+    "minimatch": "^10.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.109.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.54.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  },
+  "icon": "images/icon.png"
+}
