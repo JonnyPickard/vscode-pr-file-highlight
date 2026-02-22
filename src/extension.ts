@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { COMMANDS, SECTION } from './constants.js';
 import { getConfig, resolveBaseBranch, shouldIgnore } from './config.js';
 import { findGitRoot, findGitDir, getBranchChanges, getUncommittedChanges, getLocalBranches } from './gitService.js';
@@ -90,10 +91,33 @@ async function discoverGitInfo(): Promise<{ roots: string[]; dirs: string[] }> {
 	const roots: string[] = [];
 	const dirs: string[] = [];
 	for (const folder of folders) {
-		const root = await findGitRoot(folder.uri.fsPath);
-		if (root && !roots.includes(root)) {
+		const fsPath = folder.uri.fsPath;
+		const topLevel = await findGitRoot(fsPath);
+		if (!topLevel) {
+			continue;
+		}
+
+		// In a nested worktree, --show-toplevel may return the main repo root
+		// instead of the worktree root. Detect worktrees by checking for a .git
+		// FILE (not directory) and use the workspace folder path instead.
+		let root = topLevel;
+		if (topLevel !== fsPath) {
+			try {
+				const stat = await vscode.workspace.fs.stat(
+					vscode.Uri.file(path.join(fsPath, '.git'))
+				);
+				if (stat.type === vscode.FileType.File) {
+					root = fsPath;
+					outputChannel.appendLine(`Worktree detected: using ${fsPath} instead of ${topLevel}`);
+				}
+			} catch {
+				// No .git at workspace level — use topLevel as-is
+			}
+		}
+
+		if (!roots.includes(root)) {
 			roots.push(root);
-			const gitDir = await findGitDir(folder.uri.fsPath);
+			const gitDir = await findGitDir(fsPath);
 			if (gitDir) {
 				dirs.push(gitDir);
 			}
