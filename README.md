@@ -2,10 +2,16 @@
 
 A VS Code extension that decorates files in the Explorer based on their git change status relative to a configurable base branch. Quickly see which files are part of your current branch's changeset without opening the Source Control panel.
 
+## How it works
+
+The extension uses **plain git only** — no GitHub CLI, no API tokens, no PR detection. It runs `git diff --name-only <baseBranch>...HEAD` to find files that differ between your current branch and the configured base branch (defaults to `main`). Decorations update automatically when you switch branches, commit, or save files.
+
+**Requirements:** Git must be installed and available on your `PATH` (it almost certainly already is if you're using VS Code with git repos).
+
 ## Features
 
-- **Branch changes** — files changed vs the base branch get a green `●` badge, propagated up through parent directories
-- **Uncommitted changes** — unstaged/staged files get an amber `◌` badge (takes priority over branch badge)
+- **Branch changes** — files changed vs the base branch get a `●` badge, propagated up through parent directories
+- **Uncommitted changes** — unstaged/staged files get a `◌` badge (takes priority over branch badge)
 - **Configurable base branch** — supports a single branch name or an ordered fallback list (e.g. `["main", "master"]`)
 - **Worktree support** — works correctly in git worktrees
 - **Status bar indicator** — shows the current base branch; click to change it
@@ -65,6 +71,16 @@ The extension logs to the **PR File Highlight** output channel (View → Output 
 ```bash
 npm run lint
 ```
+
+### Building and installing locally
+
+```bash
+npm run compile
+npx @vscode/vsce package              # produces pr-file-highlight-<version>.vsix
+code --install-extension pr-file-highlight-*.vsix --force
+```
+
+Then reload VS Code (`Cmd+Shift+P` → "Developer: Reload Window").
 
 ## Releasing
 
